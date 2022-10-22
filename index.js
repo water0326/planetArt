@@ -13,8 +13,8 @@ var map = []
 
 function canvas_init_setting() {
     screen_cycle = 0;
-    planet_radius = 300;
-    planet_one_line_pixels = 40;
+    planet_radius = 250;
+    planet_one_line_pixels = 43;
     planet_Xangle = 0;
     planet_Yangle = 0;
     var tmp, tmp2;
@@ -53,6 +53,10 @@ function data_update() {
 // ############################ DRAW ############################# //
 // ############################ DRAW ############################# //
 // ############################ DRAW ############################# //
+
+/*
+XmovePos, YmovePos는 정수여야함
+*/
 
 function planet_draw(radius, pixel, XmovePos, YmovePos) {
     ctx.translate(canvas.width / 2, canvas.height / 2);
