@@ -4,9 +4,19 @@
     overflow: hidden;
 }
 
-canvas {
-    width: 700px;
-    height: 700px;
-    margin-top: 200px;
-    margin-left: 200px;
+body {
+    background-color: rgb(34, 33, 62);
+}
+
+#main {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+#canvas {
+    width: 90vh;
+    height: 90vh;
+    margin-top: 5vh;
+    bottom: 0;
 }
