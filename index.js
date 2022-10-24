@@ -9,6 +9,24 @@ var map = [];
 var isClicked;
 var click_xPos, click_yPos;
 
+
+// var k_1;
+// var k_2;
+
+// var k1_sqr;
+// var k2_sqr;
+// var k1_sqrt;
+// var k2_sqrt;
+
+// var x_1;
+// var x_2;
+// var y_1;
+// var y_2;
+
+// var x_m;
+// var y_m;
+// var k_m;
+
 // ############################ INIT SETTING ############################# //
 // ############################ INIT SETTING ############################# //
 // ############################ INIT SETTING ############################# //
@@ -57,29 +75,43 @@ XmovePos, YmovePos는 정수여야함
 */
 
 function get_middle(a, b, r) {
-    var k_1 = (a * b + (-1) * Math.sqrt(a * a + b * b - r * r)) / (a * a - r * r);
-    var k_2 = (a * b + Math.sqrt(a * a + b * b - r * r)) / (a * a - r * r);
-    var x_1 = (k_1 * r * Math.sqrt(k_1 * k_1 + 1) * (-1)) / (k_1 * k_1 + 1);
-    var x_2 = (k_2 * r * Math.sqrt(k_2 * k_2 + 1)) / (k_2 * k_2 + 1);
-    var y_1 = k_1 * x_1 + (-1) * r * Math.sqrt(k_1 * k_1 + 1);
-    var y_2 = k_2 * x_2 + r * Math.sqrt(k_2 * k_2 + 1);
 
-    var x_m = (x_2 - x_1) / 2;
-    var y_m = (y_2 - y_1) / 2;
-    var k_m = y_m / x_m;
-    console.log([x_m, y_m, k_m]);
-    return [x_m, y_m, k_m];
+    var k_1 = (a * b + (-1) * r * (a * a + b * b - r * r)**0.5) / (a * a - r * r);
+    var k_2 = (a * b + r * (a * a + b * b - r * r)**0.5) / (a * a - r * r);
+
+    var k1_sqr = k_1 * k_1 + 1;
+    var k2_sqr = k_2 * k_2 + 1;
+    var k1_sqrt = (k1_sqr)**0.5;
+    var k2_sqrt = (k2_sqr)**0.5;
+
+    var x_1 = (k_1 * r * k1_sqrt * (-1)) / (k1_sqr);
+    var x_2 = (k_2 * r * k2_sqrt) / (k2_sqr);
+    var y_1 = k_1 * x_1 + r * k1_sqrt;
+    var y_2 = k_2 * x_2 + (-1) * r * k2_sqrt;
+
+    var x_m = (x_2 + x_1) * 0.5;
+    var y_m = (y_2 + y_1) * 0.5;
+    var k_m = (y_2 - y_1) / (x_2 - x_1);
+    
+    return [x_m, y_m, k_m, x_1, y_1, x_2, y_2];
 
 }
 
 function get_image_value(a, b, x, y, middle) {
-    var k_image = (y - middle[1]) / (x - middle[0])
+    var k_image = (y - b) / (x - a);
+    
+    
     var x_image = ((-1) * a * k_image + b + middle[2] * middle[0] - middle[1]) / (middle[2] - k_image);
     var y_image = k_image * (x_image - a) + b;
 
-    var height_result = Math.sqrt((middle[0] - x_image) * (middle[0] - x_image) + (middle[1] - y_image) * (middle[1] - y_image));
+    if (x < x_image) return false;
+    if(b == 0) {
+        height_result = k_image * (middle[0] - a) + b;
+        return height_result;
+    }
+    var height_result = ((middle[0] - x_image) * (middle[0] - x_image) + (middle[1] - y_image) * (middle[1] - y_image))**0.5;
     
-    return middle[1] > y_image ? height_result * (-1) : height_result;
+    return y_image > middle[1] ? height_result : height_result * (-1);
 }
 
 function planet_draw(radius, size, XmovePos, YmovePos, map) {
@@ -87,12 +119,10 @@ function planet_draw(radius, size, XmovePos, YmovePos, map) {
 
     var a = radius * 2;
     var b = 0;
-    var c = radius;
+    var c = -radius;
 
     var x_middle = get_middle(a, b, radius);
     var y_middle = get_middle(a, c, radius);
-    
-
 
     for(var deltaFor = 0 ; deltaFor < size; deltaFor++) {
         for(var cetaFor = 0 ; cetaFor < size; cetaFor++) {
@@ -106,8 +136,12 @@ function planet_draw(radius, size, XmovePos, YmovePos, map) {
             var ceta = (-1) * Math.PI / 2 + Math.PI / size * (cetaPos - XmovePos);
             var delta = Math.PI / size * (deltaPos - YmovePos);
             
+
+
             var x_height = get_image_value(a, b, radius * Math.cos(Math.PI * 0.5 - delta) * Math.sin(Math.PI * 0.5 - ceta), radius * Math.cos(Math.PI * 0.5 - (delta)) * Math.sin(ceta), x_middle);
             var y_height = get_image_value(a, c, radius * Math.cos(Math.PI * 0.5 - delta) * Math.sin(Math.PI * 0.5 - ceta), radius * Math.sin(Math.PI * 0.5 - (delta)), y_middle);
+
+            if(x_height === false || y_height === false) continue;
 
             if(!map[cetaPos][deltaPos]) continue;
 
@@ -116,7 +150,8 @@ function planet_draw(radius, size, XmovePos, YmovePos, map) {
             ctx.fillStyle = map[cetaPos][deltaPos];
 
             ctx.arc(x_height, y_height, 5, 0, 2 * Math.PI);
-            console.log(x_height, y_height);
+            //ctx.arc(radius * Math.sin(delta) * Math.sin(ceta), radius * Math.cos(delta), 5, 0, 2 * Math.PI);
+            
         
             ctx.fill();
             
@@ -153,11 +188,8 @@ function canvas_loop() {
     // Screen Erase Code & Position Init
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
-    if(screen_cycle == 0) {
-        data_update();
-        screen_draw();
-    }
+    data_update();
+    screen_draw();
     
     
     
